@@ -21,7 +21,7 @@ type Context struct {
 	// request info
 	Path   string
 	Method string
-	params map[string]string
+	Params map[string]string
 	// response info
 	StautsCode int
 }
@@ -38,7 +38,7 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 
 // Param  我们将解析后的参数存储到Params中，通过c.Param("lang")的方式获取到对应的值
 func (c *Context) Param(key string) string {
-	value := c.params[key]
+	value := c.Params[key]
 	return value
 }
 

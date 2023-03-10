@@ -57,29 +57,31 @@ func (r *router) addRoute(method string, pattern string, handler HandlerFunc) {
 	r.handlers[key] = handler
 }
 
-func (r *router) getRouter(method string, path string) (*node, map[string]string) {
-	serchParts := parsePattern(path)
+func (r *router) getRoute(method string, path string) (*node, map[string]string) {
+	searchParts := parsePattern(path)
 	params := make(map[string]string)
 	root, ok := r.roots[method]
+
 	if !ok {
 		return nil, nil
 	}
 
-	n := root.search(serchParts, 0)
+	n := root.search(searchParts, 0)
 
 	if n != nil {
 		parts := parsePattern(n.pattern)
-		for i, part := range parts {
+		for index, part := range parts {
 			if part[0] == ':' {
-				params[part[1:]] = serchParts[i]
+				params[part[1:]] = searchParts[index]
 			}
 			if part[0] == '*' && len(part) > 1 {
-				params[part[1:]] = strings.Join(serchParts[i:], "/")
+				params[part[1:]] = strings.Join(searchParts[index:], "/")
 				break
 			}
 		}
 		return n, params
 	}
+
 	return nil, nil
 }
 
@@ -87,10 +89,10 @@ func (r *router) getRouter(method string, path string) (*node, map[string]string
 // 在调用匹配到的handler前，将解析出来的路由参数赋值给了c.Params。
 // 这样就能够在handler中，通过Context对象访问到具体的值了。
 func (r *router) handle(c *Context) {
-	n, param := r.getRouter(c.Method, c.Path)
+	n, params := r.getRoute(c.Method, c.Path)
 	if n != nil {
-		c.params = param
-		key := Concat(c.Method, "-", c.Path)
+		c.Params = params
+		key := Concat(c.Method, "-", n.pattern)
 		r.handlers[key](c)
 	} else {
 		c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
