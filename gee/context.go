@@ -21,6 +21,7 @@ type Context struct {
 	// request info
 	Path   string
 	Method string
+	params map[string]string
 	// response info
 	StautsCode int
 }
@@ -33,6 +34,12 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 		Path:   req.URL.Path,
 		Method: req.Method,
 	}
+}
+
+// Param  我们将解析后的参数存储到Params中，通过c.Param("lang")的方式获取到对应的值
+func (c *Context) Param(key string) string {
+	value := c.params[key]
+	return value
 }
 
 // PostForm  获取URL中的参数  如http://gee.com?key=value/
