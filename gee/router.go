@@ -7,8 +7,8 @@ import (
 
 // router route struct
 type router struct {
-	roots    map[string]*node
-	handlers map[string]HandlerFunc
+	roots    map[string]*node       //路由树，以不同的 HTTP 方法作为键（key），对应的值是路由树的根节点
+	handlers map[string]HandlerFunc //处理函数（handler）的字典，以路径作为键，对应的值是处理该路径的处理函数
 }
 
 // NewRouter Create New Router object
@@ -44,7 +44,17 @@ func parsePattern(pattern string) []string {
 	return parts
 }
 
-// addRoute register handler
+// addRoute 在路由中注册一个路由和其对应的处理函数，我们需要完成以下步骤：
+//
+//	解析路由模式，获取其中的所有部分。
+//	以请求方法作为键，将节点树添加到 roots 映射中。
+//	使用节点树将路由模式添加到路由树中。
+//	以 请求方法 + 路由模式 作为键，将处理函数添加到处理函数映射中
+//
+// 我们首先通过 parsePattern 函数解析出路由模式中的所有部分，然后将请求方法作为键，
+// 将节点树添加到 roots 映射中。如果 roots 映射尚不存在，则创建一个新的 roots 映射。
+// 我们在 handlers 映射中存储处理函数，以 请求方法 + 路由模式 作为键。
+// 现在我们可以通过以下代码调用 addRoute 方法，将路由和其处理函数添加到路由树中
 func (r *router) addRoute(method string, pattern string, handler HandlerFunc) {
 	parts := parsePattern(pattern)
 

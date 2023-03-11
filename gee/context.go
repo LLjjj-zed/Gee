@@ -13,22 +13,22 @@ import (
 
 type H map[string]interface{}
 
-// Context struct
+// Context struct 用于封装 HTTP 请求和响应的相关信息，以及相关的处理函数
 type Context struct {
 	// origin objects
-	Writer http.ResponseWriter
-	Req    *http.Request
+	Writer http.ResponseWriter //HTTP 响应的写入器，用于向客户端发送响应数据
+	Req    *http.Request       //HTTP 请求的指针，用于获取客户端发送的请求信息，例如请求方法、请求头、请求体等
 	// request info
-	Path   string
-	Method string
-	Params map[string]string
+	Path   string            //请求的路径，即 URL 中的路径部分
+	Method string            //请求的方法，例如 GET、POST 等
+	Params map[string]string //请求中的路由参数，由路由器解析后存储在此字段中
 	// response info
-	StatusCode int
+	StatusCode int //响应的状态码，例如 200、404 等
 	// middleware
-	handlers []HandlerFunc
-	index    int
+	handlers []HandlerFunc //处理函数的切片，用于存储当前请求所需要执行的所有处理函数
+	index    int           //当前请求需要执行的处理函数在 handlers 切片中的索引
 	// engine pointer
-	engine *Engine
+	engine *Engine //指向引擎的指针，用于访问引擎中的一些全局配置和方法
 }
 
 // newContext 创建一个新的context对象
@@ -91,7 +91,9 @@ func (c *Context) String(code int, format string, values ...interface{}) {
 	c.Writer.Write([]byte(fmt.Sprintf(format, values...)))
 }
 
-// JSON 将json写入Writer中
+// JSON 将 HTTP 响应状态码设置为指定的 code，将 Content-Type 头设置为 "application/json"。
+// 然后，它使用 Go 标准库中的 json.NewEncoder 函数将给定的 object 编码为 JSON 字符串，
+// 并将其写入 HTTP 响应正文中。如果在编码期间出现错误，则返回 HTTP 500 内部服务器错误，并在响应正文中包含错误消息
 func (c *Context) JSON(code int, object interface{}) {
 	c.SetHeader("Content-Type", "application/json")
 	c.StatusCode = code
@@ -116,6 +118,9 @@ func (c *Context) HTML(code int, name string, data interface{}) {
 	}
 }
 
+// Fail 将 HTTP 响应状态码设置为指定的 code，并将一个包含错误信息的 JSON 响应发送给客户端，
+// 然后将当前处理程序的索引设置为 handlers 切片的末尾，以确保在 handlers 切片中的后续处理程序不会被执行。
+// 这个方法通常在处理请求时遇到错误时被调用，以及在中间件中进行错误处理时使用。
 func (c *Context) Fail(code int, err string) {
 	c.index = len(c.handlers)
 	c.JSON(code, H{"message": err})

@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Logger 函数返回一个 HandlerFunc 类型的函数，用于记录请求的处理时间和状态码等信息
 func Logger() HandlerFunc {
 	return func(c *Context) {
 		// Start timer
