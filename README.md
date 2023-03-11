@@ -57,3 +57,54 @@ version 1.3.0
 大部分情况下的路由分组，是以相同的前缀来区分的。因此，我们今天实现的分组控制也是以前缀来区分，
 并且支持分组的嵌套。例如/post是一个分组，/post/a和/post/b可以是该分组下的子分组。
 作用在/post分组上的中间件(middleware)，也都会作用在子分组，子分组还可以应用自己特有的中间件。
+
+
+version 1.4.0
+
+
+如果我们将用户在映射路由时定义的Handler添加到c.handlers列表中，结果会怎么样呢？想必你已经猜到了。</br>
+func A(c *Context) {</br>
+&emsp;&emsp;part1</br>
+&emsp;&emsp;c.Next()</br>
+&emsp;&emsp;part2</br>
+}</br>
+func B(c *Context) {</br>
+&emsp;&emsp;part3</br>
+&emsp;&emsp;c.Next()</br>
+&emsp;&emsp;part4</br>
+}</br>
+假设我们应用了中间件 A 和 B，和路由映射的 Handler。c.handlers是这样的[A, B, Handler]，c.index初始化为-1。调用c.Next()，接下来的流程是这样的：
+
+c.index++，c.index 变为 0</br>
+0 < 3，调用 c.handlers[0]，即 A</br>
+执行 part1，调用 c.Next()</br>
+c.index++，c.index 变为 1</br>
+1 < 3，调用 c.handlers[1]，即 B</br>
+执行 part3，调用 c.Next()</br>
+c.index++，c.index 变为 2</br>
+2 < 3，调用 c.handlers[2]，即Handler</br>
+Handler 调用完毕，返回到 B 中的 part4，执行 part4</br>
+part4 执行完毕，返回到 A 中的 part2，执行 part2</br>
+part2 执行完毕，结束。</br>
+
+一句话说清楚重点，最终的顺序是part1 -> part3 -> Handler -> part 4 -> part2。恰恰满足了我们对中间件的要求，接下来看调用部分的代码，就能全部串起来了。
+
+
+
+
+version 1.5.0
+网页的三剑客，JavaScript、CSS 和 HTML。要做到服务端渲染，第一步便是要支持 JS、CSS 等静态文件。还记得我们之前设计动态路由的时候，
+支持通配符*匹配多级子路径。比如路由规则/assets/*filepath，可以匹配/assets/开头的所有的地址。例如/assets/js/geektutu.js，
+匹配后，参数filepath就赋值为js/geektutu.js。
+那如果我么将所有的静态文件放在/usr/web目录下，那么filepath的值即是该目录下文件的相对地址。映射到真实的文件后，
+将文件返回，静态服务器就实现了。
+找到文件后，如何返回这一步，net/http库已经实现了。因此，gee 框架要做的，仅仅是解析请求的地址，
+映射到服务器上文件的真实地址，交给http.FileServer处理就好了。
+
+
+
+version 1.6.0
+
+对一个 Web 框架而言，错误处理机制是非常必要的。可能是框架本身没有完备的测试，
+导致在某些情况下出现空指针异常等情况。也有可能用户不正确的参数，触发了某些异常，
+例如数组越界，空指针等。如果因为这些原因导致系统宕机，必然是不可接受的。

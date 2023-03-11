@@ -1,42 +1,20 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"gee"
+	"net/http"
 )
 
 func main() {
-	r := gee.New()
-	r.GET("/index", func(c *gee.Context) {
-		c.HTML(http.StatusOK, "<h1>Index Page</h1>")
+	r := gee.Default()
+	r.GET("/", func(c *gee.Context) {
+		c.String(http.StatusOK, "Hello Geektutu\n")
 	})
-	v1 := r.Group("/v1")
-	{
-		v1.GET("/", func(c *gee.Context) {
-			c.HTML(http.StatusOK, "<h1>Hello Gee</h1>")
-		})
+	// index out of range for testing Recovery()
+	r.GET("/panic", func(c *gee.Context) {
+		names := []string{"geektutu"}
+		c.String(http.StatusOK, names[100])
+	})
 
-		v1.GET("/hello", func(c *gee.Context) {
-			// expect /hello?name=geektutu
-			c.String(http.StatusOK, "hello %s, you're at %s\n", c.Query("name"), c.Path)
-		})
-	}
-	v2 := r.Group("/v2")
-	{
-		v2.GET("/hello/:name", func(c *gee.Context) {
-			// expect /hello/geektutu
-			c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
-		})
-		v2.POST("/login", func(c *gee.Context) {
-			c.JSON(http.StatusOK, gee.H{
-				"username": c.PostForm("username"),
-				"password": c.PostForm("password"),
-			})
-		})
-
-	}
-
-	log.Fatal(r.Run(":9999"))
+	r.Run(":9999")
 }

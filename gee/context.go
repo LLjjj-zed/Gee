@@ -23,7 +23,12 @@ type Context struct {
 	Method string
 	Params map[string]string
 	// response info
-	StautsCode int
+	StatusCode int
+	// middleware
+	handlers []HandlerFunc
+	index    int
+	// engine pointer
+	engine *Engine
 }
 
 // newContext 创建一个新的context对象
@@ -33,6 +38,18 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 		Req:    req,
 		Path:   req.URL.Path,
 		Method: req.Method,
+		index:  -1,
+	}
+}
+
+// Next index是记录当前执行到第几个中间件，当在中间件中调用Next方法时，
+// 控制权交给了下一个中间件，直到调用到最后一个中间件，然后再从后往前，
+// 调用每个中间件在Next方法之后定义的部分
+func (c *Context) Next() {
+	c.index++
+	s := len(c.handlers)
+	for ; c.index < s; c.index++ {
+		c.handlers[c.index](c)
 	}
 }
 
@@ -53,9 +70,9 @@ func (c *Context) Query(key string) string {
 	return c.Req.URL.Query().Get(key)
 }
 
-// Status 设置HTTP StautsCode 并写入Header
+// Status 设置HTTP StatusCode 并写入Header
 func (c *Context) Status(code int) {
-	c.StautsCode = code
+	c.StatusCode = code
 	//使用提供的状态代码发送 HTTP 响应头
 	c.Writer.WriteHeader(code)
 }
@@ -77,7 +94,7 @@ func (c *Context) String(code int, format string, values ...interface{}) {
 // JSON 将json写入Writer中
 func (c *Context) JSON(code int, object interface{}) {
 	c.SetHeader("Content-Type", "application/json")
-	c.StautsCode = code
+	c.StatusCode = code
 	encoder := json.NewEncoder(c.Writer)
 	if err := encoder.Encode(object); err != nil {
 		http.Error(c.Writer, err.Error(), 500)
@@ -91,8 +108,15 @@ func (c *Context) Data(code int, data []byte) {
 }
 
 // HTML 将html写入Writer中
-func (c *Context) HTML(code int, html string) {
+func (c *Context) HTML(code int, name string, data interface{}) {
 	c.SetHeader("Content-Type", "text/html")
 	c.Status(code)
-	c.Writer.Write([]byte(html))
+	if err := c.engine.htmlTemplates.ExecuteTemplate(c.Writer, name, data); err != nil {
+		c.Fail(500, err.Error())
+	}
+}
+
+func (c *Context) Fail(code int, err string) {
+	c.index = len(c.handlers)
+	c.JSON(code, H{"message": err})
 }
