@@ -1,6 +1,7 @@
 package gee
 
 import (
+	"log"
 	"strings"
 	"sync"
 )
@@ -27,4 +28,14 @@ func Concat(s ...string) string {
 	//return str
 	defer buf.Reset()
 	return buf.String()
+}
+
+// Debug 用于检查错误
+const Debug = false
+
+func DPrintf(format string, a ...interface{}) (n int, err error) {
+	if Debug {
+		log.Printf(format, a...)
+	}
+	return
 }

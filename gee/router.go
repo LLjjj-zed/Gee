@@ -35,6 +35,7 @@ func parsePattern(pattern string) []string {
 	parts := make([]string, 0)
 	for _, item := range vs {
 		if item != "" {
+			DPrintf("[Router]Item:%s\n", item)
 			parts = append(parts, item)
 			if item[0] == '*' {
 				break
@@ -59,6 +60,7 @@ func (r *router) addRoute(method string, pattern string, handler HandlerFunc) {
 	parts := parsePattern(pattern)
 
 	key := Concat(method, "-", pattern)
+	DPrintf("[Router]Key:%s\n", key)
 	_, ok := r.roots[method]
 	if !ok {
 		r.roots[method] = &node{}

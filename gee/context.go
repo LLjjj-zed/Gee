@@ -50,29 +50,34 @@ func (c *Context) Next() {
 	s := len(c.handlers)
 	for ; c.index < s; c.index++ {
 		c.handlers[c.index](c)
+		DPrintf("[Context]index:%d\n", c.index)
 	}
 }
 
 // Param  我们将解析后的参数存储到Params中，通过c.Param("lang")的方式获取到对应的值
 func (c *Context) Param(key string) string {
 	value := c.Params[key]
+	DPrintf("[Context]Params:%s\n", value)
 	return value
 }
 
 // PostForm  获取URL中的参数  如http://gee.com?key=value/
 func (c *Context) PostForm(key string) string {
+	DPrintf("[Context]PostFormValue:%s\n", c.Req.FormValue(key))
 	return c.Req.FormValue(key)
 }
 
 // Query 获取query value
 func (c *Context) Query(key string) string {
 	//Query 解析 RawQuery 并返回相应的值,返回的Values实际上是一个map对象。Get 获取第一个value
+	DPrintf("[Context]QueryValue:%s\n", c.Req.URL.Query().Get(key))
 	return c.Req.URL.Query().Get(key)
 }
 
 // Status 设置HTTP StatusCode 并写入Header
 func (c *Context) Status(code int) {
 	c.StatusCode = code
+	DPrintf("[Context]StatusCode:%d\n", c.StatusCode)
 	//使用提供的状态代码发送 HTTP 响应头
 	c.Writer.WriteHeader(code)
 }
@@ -80,6 +85,7 @@ func (c *Context) Status(code int) {
 // SetHeader 设置HTTP响应头
 func (c *Context) SetHeader(key string, value string) {
 	//Set 将与键关联的标头条目设置为单个元素value
+	DPrintf("[Context]SetKey:%s\tSetValue:%s\n", key, value)
 	c.Writer.Header().Set(key, value)
 }
 
