@@ -3,6 +3,6 @@ module github.com/132982317/Gee
 go 1.19
 
 
-require gee v0.0.7
+require github.com/132982317/Gee/gee v0.0.9
 
-replace gee => ./gee
+replace github.com/132982317/Gee/gee => ./gee

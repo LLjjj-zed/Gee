@@ -1,7 +1,8 @@
 package main
 
 import (
-	"gee"
+	"github.com/132982317/Gee/gee"
+	"log"
 	"net/http"
 )
 
@@ -16,5 +17,5 @@ func main() {
 		c.String(http.StatusOK, names[100])
 	})
 
-	r.Run(":9999")
+	log.Fatal(r.Run(":9999"))
 }
