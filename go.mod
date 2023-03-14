@@ -1,4 +1,4 @@
-module gee.com
+module github.com/132982317/Gee
 
 go 1.19
 
