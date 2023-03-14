@@ -1,9 +1,9 @@
 # Gee
 
-version 1.0.0
+version 0.0.1
 实现了路由映射表，提供了用户注册静态路由的方法，包装了启动服务的函数
 
-version 1.1.0
+version 0.0.2
 设计Context,针对使用场景，封装*http.Request和http.ResponseWriter的方法，
 简化相关接口的调用，只是设计 Context 的原因之一。对于框架来说，还需要支撑额外的功能。
 例如，将来解析动态路由/hello/:name，参数:name的值放在哪呢？再比如，框架需要支持中间件，
@@ -13,7 +13,7 @@ version 1.1.0
 Context 就像一次会话的百宝箱，可以找到任何东西。
 
 
-version 1.2.0
+version 0.0.3
 之前，我们用了一个非常简单的map结构存储了路由表，使用map存储键值对，索引非常高效，但是有一个弊端，键值对的存储的方式，
 只能用来索引静态路由。那如果我们想支持类似于/hello/:name这样的动态路由怎么办呢？所谓动态路由，
 即一条路由规则可以匹配某一类型而非某一条固定的路由。例如/hello/:name，可以匹配/hello/geektutu、hello/jack等。
@@ -44,7 +44,7 @@ HTTP请求的路径恰好是由/分隔的多段构成的，因此，每一段可
 参数匹配:。例如 /p/:lang/doc，可以匹配 /p/c/doc 和 /p/go/doc。
 通配*。例如 /static/*filepath，可以匹配/static/fav.ico，也可以匹配/static/js/jQuery.js，这种模式常用于静态服务器，能够递归地匹配子路径。
 
-version 1.3.0
+version 0.0.4
 分组控制(Group Control)是 Web 框架应提供的基础功能之一。所谓分组，是指路由的分组。
 如果没有路由分组，我们需要针对每一个路由进行控制。但是真实的业务场景中，往往某一组路由需要相似的处理。例如：
 
@@ -59,7 +59,7 @@ version 1.3.0
 作用在/post分组上的中间件(middleware)，也都会作用在子分组，子分组还可以应用自己特有的中间件。
 
 
-version 1.4.0
+version 0.0.5
 
 
 如果我们将用户在映射路由时定义的Handler添加到c.handlers列表中，结果会怎么样呢？想必你已经猜到了。</br>
@@ -92,7 +92,7 @@ part2 执行完毕，结束。</br>
 
 
 
-version 1.5.0
+version 0.0.6
 网页的三剑客，JavaScript、CSS 和 HTML。要做到服务端渲染，第一步便是要支持 JS、CSS 等静态文件。还记得我们之前设计动态路由的时候，
 支持通配符*匹配多级子路径。比如路由规则/assets/*filepath，可以匹配/assets/开头的所有的地址。例如/assets/js/geektutu.js，
 匹配后，参数filepath就赋值为js/geektutu.js。
@@ -103,7 +103,7 @@ version 1.5.0
 
 
 
-version 1.6.0
+version 0.0.7
 
 对一个 Web 框架而言，错误处理机制是非常必要的。可能是框架本身没有完备的测试，
 导致在某些情况下出现空指针异常等情况。也有可能用户不正确的参数，触发了某些异常，
